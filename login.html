@@ -170,12 +170,11 @@
 
                     // الرجوع للصفحة اللي جاء منها العميل
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectTo = urlParams.get('redirect') || 'https://rakaga66.github.io/7roof-and-playground/old.html';
-                    // إذا الـ redirect نسبي (مثل old.html) حوله لرابط GitHub Pages كامل
+                    const redirectTo = urlParams.get('redirect') || 'https://rakaga66.github.io/7rof-game/old.html';
                     if (redirectTo.startsWith('http')) {
                         window.location.href = redirectTo;
                     } else {
-                        window.location.href = 'https://rakaga66.github.io/7roof-and-playground/' + redirectTo;
+                        window.location.href = 'https://rakaga66.github.io/7rof-game/' + redirectTo;
                     }
                 } else {
                     err.textContent = data.error || 'رقم الجوال غير صحيح';
