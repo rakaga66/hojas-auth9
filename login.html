@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل الدخول — حروف</title>
+    <style>
+        @font-face {
+            font-family: 'HrofFont';
+            src: url('حروف.ttf') format('truetype');
+        }
+
+        :root {
+            --purple-bg: #6B3FA0;
+            --yellow-main: #FFD600;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'HrofFont', sans-serif;
+            background-color: var(--purple-bg);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 40px 40px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border: 4px solid #000;
+            border-radius: 40px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 12px 12px 0 #000;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 5rem;
+            color: var(--yellow-main);
+            -webkit-text-stroke: 3px #000;
+            paint-order: stroke fill;
+            text-shadow: 2px 2px 0 #000, 4px 4px 0 #000, 6px 6px 0 #000;
+            margin-bottom: 30px;
+            line-height: 1;
+        }
+
+        .field-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            font-size: 1.6rem;
+            color: #000;
+            -webkit-text-stroke: 0.5px #000;
+            margin-bottom: 8px;
+            padding-right: 5px;
+        }
+
+        input {
+            width: 100%;
+            background: #f0f4f8;
+            border: 3px solid #000;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-family: 'HrofFont', sans-serif;
+            font-size: 1.3rem;
+            outline: none;
+            text-align: center;
+        }
+
+        input:focus {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0 #000;
+            background: #fff;
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--yellow-main);
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 50px;
+            padding: 18px;
+            font-family: 'HrofFont', sans-serif;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #000;
+            transition: all 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #000;
+        }
+
+        .error-msg {
+            color: #ff4757;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <div class="logo">حروف</div>
+
+        <div class="field-group">
+            <label style="text-align: center; width: 100%; font-size: 2rem;">ادخل رقم الجوال</label>
+            <input type="text" id="phone" placeholder="05********" autocomplete="off" style="text-align: center; font-size: 2rem; border-width: 4px;" />
+        </div>
+
+        <button class="btn" id="loginBtn" onclick="doLogin()">دخول اللعبة</button>
+
+        <div class="error-msg" id="errorMsg">خطأ في رقم الجوال</div>
+    </div>
+
+    <script>
+        async function doLogin() {
+            const phone = document.getElementById('phone').value.trim();
+            const err = document.getElementById('errorMsg');
+            const btn = document.getElementById('loginBtn');
+
+            err.classList.remove('show');
+
+            if (!phone) {
+                err.textContent = 'يرجى إدخال رقم الجوال';
+                err.classList.add('show');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'جاري التحقق...';
+
+            try {
+                const r = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: phone
+                    })
+                });
+                const data = await r.json();
+
+                if (r.ok && data.success) {
+                    localStorage.setItem('hojas_token', data.token);
+                    localStorage.setItem('hojas_username', data.username);
+                    // Redirect to the main game
+                    window.location.href = '/index.html';
+                } else {
+                    err.textContent = data.error || 'رقم الجوال غير صحيح';
+                    err.classList.add('show');
+                }
+            } catch (e) {
+                err.textContent = 'خطأ في الاتصال بالسيرفر';
+                err.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'دخول اللعبة';
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+    </script>
+</body>
+
+</html>
