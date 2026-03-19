@@ -16,9 +16,7 @@
             --yellow-main: #FFD600;
         }
 
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -132,21 +130,12 @@
     </div>
 
     <script>
-        const err = document.getElementById('errorMsg');
-        if (window.location.protocol === 'file:') {
-            err.textContent = 'تنبيه: أنت تفتح الملف من جهازك مباشرة. الدخول لن يعمل إلا إذا رفعت الملفات على سيرفر (Railway) أو استخدمت Live Server.';
-            err.classList.add('show');
-            err.style.color = 'orange';
-            err.style.fontSize = '0.9rem';
-        }
-
         async function doLogin() {
             const phone = document.getElementById('phone').value.trim();
+            const err = document.getElementById('errorMsg');
             const btn = document.getElementById('loginBtn');
 
             err.classList.remove('show');
-            err.style.color = '#ff4757';
-            err.style.fontSize = '1.1rem';
 
             if (!phone) {
                 err.textContent = 'يرجى إدخال رقم الجوال';
@@ -167,27 +156,24 @@
                 const data = await r.json();
 
                 if (r.ok && data.success) {
-                    // حفظ التوكن محلياً (للسيرفر الحالي) وتمريره للعبة (للنطاق الآخر)
+                    // حفظ التوكن
                     localStorage.setItem('hojas_token', data.token);
-                    localStorage.setItem('hojas_username', data.username);
 
+                    // الرجوع للصفحة المطلوبة مع إرسال التوكن في الرابط
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectTo = urlParams.get('redirect');
-
-                    if (redirectTo) {
-                        let targetUrl = decodeURIComponent(redirectTo);
-                        const separator = targetUrl.includes('?') ? '&' : '?';
-                        window.location.href = targetUrl + separator + 'token=' + data.token;
-                    } else {
-                        window.location.href = '/index.html';
-                    }
+                    let redirectTo = urlParams.get('redirect') || 'https://rakaga66.github.io/7rof-game/game.html';
+                    
+                    // أضف التوكن في الرابط عشان game.html يقدر يقرأه
+                    const sep = redirectTo.includes('?') ? '&' : '?';
+                    redirectTo = redirectTo + sep + 'token=' + data.token;
+                    
+                    window.location.href = redirectTo;
                 } else {
-                    err.textContent = data.message || 'رقم الجوال غير صحيح (جرب 0558616161)';
+                    err.textContent = data.error || 'رقم الجوال غير صحيح';
                     err.classList.add('show');
                 }
             } catch (e) {
-                console.error('Login error:', e);
-                err.textContent = 'خطأ في الاتصال بالسيرفر! تأكد من تشغيله عبر سيرفر (مثل Railway) وليس كملف.';
+                err.textContent = 'خطأ في الاتصال بالسيرفر';
                 err.classList.add('show');
             } finally {
                 btn.disabled = false;
