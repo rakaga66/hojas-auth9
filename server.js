@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// تشغيل الملفات من المجلد الرئيسي مباشرة (بدون مجلد public)
+// هذا السطر يخبر السيرفر أن الملفات موجودة في الواجهة الرئيسية بجانبه
 app.use(express.static(__dirname));
 
 const DATA_FILE = path.join(__dirname, 'users.json');
@@ -15,18 +15,17 @@ const MASTER_SECRET = process.env.ADMIN_SECRET || "Rr74417441@";
 // دالة قراءة البيانات
 const readData = () => {
     if (!fs.existsSync(DATA_FILE)) return { users: [] };
-    try { return JSON.parse(fs.readFileSync(DATA_FILE)); }
+    try { return JSON.parse(fs.readFileSync(DATA_FILE)); } 
     catch (e) { return { users: [] }; }
 };
 
 const writeData = (data) => fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 4));
 
-// --- المسارات الرئيسية ---
-
+// --- المسارات لعرض الصفحات المرفوعة في الواجهة ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
-// API الدخول للعملاء
+// API التحقق والدخول
 app.post('/api/login', (req, res) => {
     const { phone } = req.body;
     const data = readData();
@@ -37,24 +36,18 @@ app.post('/api/login', (req, res) => {
     res.json({ success: true, username: user.username });
 });
 
-// API الإدارة (Stats)
+// باقي الـ APIs للإدارة
 app.get('/api/admin/stats', (req, res) => {
     if (req.headers['x-admin-secret'] !== MASTER_SECRET) return res.status(403).send('Unauthorized');
     const data = readData();
-    res.json({
-        total: data.users.length,
-        activated: data.users.filter(u => u.isActivated).length,
-        pending: data.users.filter(u => !u.isActivated).length
-    });
+    res.json({ total: data.users.length, activated: data.users.filter(u => u.isActivated).length, pending: data.users.filter(u => !u.isActivated).length });
 });
 
-// API الإدارة (Users List)
 app.get('/api/admin/users', (req, res) => {
     if (req.headers['x-admin-secret'] !== MASTER_SECRET) return res.status(403).send('Unauthorized');
     res.json(readData().users);
 });
 
-// API الإضافة اليدوية
 app.post('/api/admin/add-user', (req, res) => {
     if (req.headers['x-admin-secret'] !== MASTER_SECRET) return res.status(403).send('Unauthorized');
     const { username, phone } = req.body;
@@ -62,10 +55,9 @@ app.post('/api/admin/add-user', (req, res) => {
     if (data.users.find(u => u.phone === phone)) return res.status(400).json({ error: 'موجود مسبقاً' });
     data.users.push({ username, phone, isActivated: true, createdAt: new Date().toISOString() });
     writeData(data);
-    res.json({ success: true, message: 'تم التفعيل' });
+    res.json({ success: true });
 });
 
-// API الحذف
 app.delete('/api/admin/user/:username', (req, res) => {
     if (req.headers['x-admin-secret'] !== MASTER_SECRET) return res.status(403).send('Unauthorized');
     const data = readData();
