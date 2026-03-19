@@ -130,8 +130,7 @@
 
         <div class="field-group">
             <label style="text-align: center; width: 100%; font-size: 2rem;">ادخل رقم الجوال</label>
-            <input type="text" id="phone" placeholder="05********" autocomplete="off"
-                style="text-align: center; font-size: 2rem; border-width: 4px;" />
+            <input type="text" id="phone" placeholder="05********" autocomplete="off" style="text-align: center; font-size: 2rem; border-width: 4px;" />
         </div>
 
         <button class="btn" id="loginBtn" onclick="doLogin()">دخول اللعبة</button>
@@ -159,23 +158,23 @@
             try {
                 const r = await fetch('/api/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: phone })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: phone
+                    })
                 });
                 const data = await r.json();
-
-                if (r.ok && data.success) {
-                    // حفظ التوكن
-                    localStorage.setItem('hojas_token', data.token);
-
-                    // الرجوع للصفحة اللي جاء منها العميل
+if (r.ok && data.success) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTo = urlParams.get('redirect') || '/game.html'; 
+    window.location.href = decodeURIComponent(redirectTo);
+}
+                    // Redirect to the main game or provided URL
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectTo = urlParams.get('redirect') || 'https://rakaga66.github.io/7rof-game/old.html';
-                    if (redirectTo.startsWith('http')) {
-                        window.location.href = redirectTo;
-                    } else {
-                        window.location.href = 'https://rakaga66.github.io/7rof-game/' + redirectTo;
-                    }
+                    const redirect = urlParams.get('redirect') || '/index.html';
+                    window.location.href = redirect;
                 } else {
                     err.textContent = data.error || 'رقم الجوال غير صحيح';
                     err.classList.add('show');
