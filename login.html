@@ -129,8 +129,9 @@
         <div class="logo">حروف</div>
 
         <div class="field-group">
-            <label style="text-align: center; width: 100%; font-size: 2rem;"> ادخل رقم الجوال في سله</label>
-            <input type="text" id="phone" placeholder="05********" autocomplete="off" style="text-align: center; font-size: 2rem; border-width: 4px;" />
+            <label style="text-align: center; width: 100%; font-size: 2rem;">ادخل رقم الجوال</label>
+            <input type="text" id="phone" placeholder="05********" autocomplete="off"
+                style="text-align: center; font-size: 2rem; border-width: 4px;" />
         </div>
 
         <button class="btn" id="loginBtn" onclick="doLogin()">دخول اللعبة</button>
@@ -158,31 +159,19 @@
             try {
                 const r = await fetch('/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phone: phone
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone })
                 });
                 const data = await r.json();
 
-               if (r.ok && data.success) {
+                if (r.ok && data.success) {
+                    // حفظ التوكن
                     localStorage.setItem('hojas_token', data.token);
-                    localStorage.setItem('hojas_username', data.username);
-                    
-                    // نظام التوجيه الذكي لبراند قاف
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirectTo = urlParams.get('redirect');
 
-                    if (redirectTo) {
-                        // إذا العميل جاي من رابط لعبة معينة، نرجعه لها فوراً
-                        window.location.href = decodeURIComponent(redirectTo);
-                    } else {
-                        // إذا دخل على صفحة الدخول مباشرة، نرجعه للواجهة الرئيسية
-                        window.location.href = '/index.html';
-                    }
-                } else {
+                    // الرجوع للصفحة اللي جاء منها العميل
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectTo = urlParams.get('redirect') || 'https://rakaga66.github.io/7roof-and-playground/old.html';
+                    window.location.href = decodeURIComponent(redirectTo);
                 } else {
                     err.textContent = data.error || 'رقم الجوال غير صحيح';
                     err.classList.add('show');
