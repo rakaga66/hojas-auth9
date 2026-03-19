@@ -6,8 +6,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// تشغيل الملفات من المجلد الرئيسي مباشرة (بما أنك رافعهم بدون مجلد public)
-app.use(express.static(__dirname));
+// تشغيل الملفات من المجلد public
+app.use(express.static(path.join(__dirname, 'public')));
 
 const DATA_FILE = path.join(__dirname, 'users.json');
 const MASTER_SECRET = process.env.ADMIN_SECRET || "Rr74417441@";
@@ -21,16 +21,13 @@ const readData = () => {
 
 const writeData = (data) => fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 4));
 
-// --- المسارات الرئيسية (تم تعديل المسارات هنا لتطابق ملفاتك) ---
+// --- المسارات الرئيسية ---
 
-// الصفحة الرئيسية (البلاي قراوند الفخمة)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-
-// صفحة تسجيل الدخول
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+// الصفحة الرئيسية للسيرفر هي صفحة تسجيل الدخول
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
 // صفحة الإدارة
-app.get('/admin-page', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
 // API الدخول للعملاء
 app.post('/api/login', (req, res) => {
