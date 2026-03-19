@@ -167,11 +167,22 @@
                 });
                 const data = await r.json();
 
-                if (r.ok && data.success) {
+               if (r.ok && data.success) {
                     localStorage.setItem('hojas_token', data.token);
                     localStorage.setItem('hojas_username', data.username);
-                    // Redirect to the main game
-                    window.location.href = '/index.html';
+                    
+                    // نظام التوجيه الذكي لبراند قاف
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectTo = urlParams.get('redirect');
+
+                    if (redirectTo) {
+                        // إذا العميل جاي من رابط لعبة معينة، نرجعه لها فوراً
+                        window.location.href = decodeURIComponent(redirectTo);
+                    } else {
+                        // إذا دخل على صفحة الدخول مباشرة، نرجعه للواجهة الرئيسية
+                        window.location.href = '/index.html';
+                    }
+                } else {
                 } else {
                     err.textContent = data.error || 'رقم الجوال غير صحيح';
                     err.classList.add('show');
