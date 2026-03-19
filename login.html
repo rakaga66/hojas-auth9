@@ -16,9 +16,7 @@
             --yellow-main: #FFD600;
         }
 
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -61,26 +59,16 @@
 
         .field-group {
             margin-bottom: 25px;
-            text-align: right;
-        }
-
-        label {
-            display: block;
-            font-size: 1.6rem;
-            color: #000;
-            -webkit-text-stroke: 0.5px #000;
-            margin-bottom: 8px;
-            padding-right: 5px;
         }
 
         input {
             width: 100%;
             background: #f0f4f8;
-            border: 3px solid #000;
+            border: 4px solid #000;
             border-radius: 15px;
             padding: 15px 20px;
             font-family: 'HrofFont', sans-serif;
-            font-size: 1.3rem;
+            font-size: 2rem;
             outline: none;
             text-align: center;
         }
@@ -110,6 +98,11 @@
             box-shadow: 0 2px 0 #000;
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .error-msg {
             color: #ff4757;
             margin-top: 15px;
@@ -124,19 +117,16 @@
 </head>
 
 <body>
-
     <div class="card">
         <div class="logo">حروف</div>
 
         <div class="field-group">
-            <label style="text-align: center; width: 100%; font-size: 2rem;">ادخل رقم الجوال</label>
-            <input type="text" id="phone" placeholder="05********" autocomplete="off"
-                style="text-align: center; font-size: 2rem; border-width: 4px;" />
+            <label style="display:block; text-align:center; font-size:2rem; margin-bottom:10px;">ادخل رقم الجوال</label>
+            <input type="text" id="phone" placeholder="05********" autocomplete="off" />
         </div>
 
         <button class="btn" id="loginBtn" onclick="doLogin()">دخول اللعبة</button>
-
-        <div class="error-msg" id="errorMsg">خطأ في رقم الجوال</div>
+        <div class="error-msg" id="errorMsg"></div>
     </div>
 
     <script>
@@ -159,34 +149,31 @@
             try {
                 const r = await fetch('/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phone: phone
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone })
                 });
+
                 const data = await r.json();
+
                 if (r.ok && data.success) {
+                    // حفظ التوكن
+                    localStorage.setItem('hojas_token', data.token);
+
+                    // الرجوع للصفحة المطلوبة
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectTo = urlParams.get('redirect') || '/game.html';
-                    window.location.href = decodeURIComponent(redirectTo);
+                    const redirectTo = urlParams.get('redirect') || 'https://rakaga66.github.io/7rof-game/game.html';
+                    window.location.href = redirectTo;
+                } else {
+                    err.textContent = data.error || 'رقم الجوال غير صحيح';
+                    err.classList.add('show');
                 }
-                // Redirect to the main game or provided URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const redirect = urlParams.get('redirect') || '/index.html';
-                window.location.href = redirect;
-            } else {
-                err.textContent = data.error || 'رقم الجوال غير صحيح';
+            } catch (e) {
+                err.textContent = 'خطأ في الاتصال بالسيرفر';
                 err.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'دخول اللعبة';
             }
-        } catch (e) {
-            err.textContent = 'خطأ في الاتصال بالسيرفر';
-            err.classList.add('show');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'دخول اللعبة';
-        }
         }
 
         document.addEventListener('keydown', e => {
